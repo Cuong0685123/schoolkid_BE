@@ -1,7 +1,7 @@
 import express from "express";
 import helmet from "helmet";
-import morgan from "morgan";
 import cors from "cors";
+import morgan from "morgan";
 import router from "./routes/index.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
@@ -13,6 +13,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 app.use("/api", router);
+
 app.use(errorHandler);
 
 export default app;

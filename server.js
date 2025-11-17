@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import routes from "./routes/index.js";
 import { securityMiddlewares } from "./config/securityPolicy.js";
-
+import { initDatabase } from "./models/index.js";
 dotenv.config();
 
 const app = express();
@@ -17,6 +17,10 @@ app.use(express.json());
 // ====== Định tuyến ======
 app.use("/api", routes);
 
+
+
+
 // ====== Khởi động server ======
 const PORT = process.env.PORT || 8080;
+ await initDatabase();
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
