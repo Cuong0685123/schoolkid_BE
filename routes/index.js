@@ -1,9 +1,9 @@
- import express from "express";
-// import userRoutes from "./user.routes.js";
-// import protectedRoutes from "./protected.routes.js";
+import express from "express";
 
- const router = express.Router();
+const router = express.Router();
 
-// //router.use("/users", userRoutes);
-// //router.use("/secure", protectedRoutes);
- export default router;
+router.get("/", (req, res) => {
+  res.json({ message: "API OK" });
+});
+
+export default router;

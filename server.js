@@ -1,26 +1,17 @@
-import express from "express";
-import helmet from "helmet";
-import cors from "cors";
 import dotenv from "dotenv";
-import routes from "./routes/index.js";
-import { securityMiddlewares } from "./config/securityPolicy.js";
-import { initDatabase } from "./models/index.js";
 dotenv.config();
 
-const app = express();
-securityMiddlewares(app);
-// ====== Middleware cơ bản ======
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
+import { initDatabase } from "./models/index.js";
+import app from "./app.js";
 
-// ====== Định tuyến ======
-app.use("/api", routes);
-
-
-
-
-// ====== Khởi động server ======
 const PORT = process.env.PORT || 8080;
- await initDatabase();
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+const startServer = async () => {
+  await initDatabase();
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+};
+
+startServer();

@@ -1,9 +1,11 @@
 import express from "express";
-import helmet from "helmet";
 import cors from "cors";
+import helmet from "helmet";
 import morgan from "morgan";
+
+// ROUTES
+import adminRoutes from "./routes/admin.routes.js";
 import router from "./routes/index.js";
-import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
 
@@ -12,8 +14,8 @@ app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
 
+// ROUTES
 app.use("/api", router);
-
-app.use(errorHandler);
+app.use("/api/admin", adminRoutes);
 
 export default app;
