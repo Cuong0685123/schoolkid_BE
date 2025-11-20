@@ -25,4 +25,28 @@ export const adminController = {
       return res.status(500).json({ message: "Lỗi server" });
     }
   },
+   register: async (req, res) => {
+    try {
+      const { username, password } = req.body;
+
+      if (!username || !password)
+        return res.status(400).json({ message: "Thiếu username hoặc password" });
+
+      const newAdmin = await adminService.register(username, password);
+
+      if (!newAdmin)
+        return res.status(400).json({ message: "Username đã tồn tại" });
+
+      return res.status(201).json({
+        message: "Tạo tài khoản admin thành công",
+        admin: {
+          id: newAdmin.id,
+          username: newAdmin.username,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Lỗi server" });
+    }
+    },
 };
