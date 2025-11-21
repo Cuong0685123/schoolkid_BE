@@ -1,7 +1,8 @@
 import { programService } from "../services/program.service.js";
 
 export const programController = {
-  
+
+  // ===== CREATE PROGRAM =====
   create: async (req, res) => {
     try {
       const program = await programService.createProgram(req.body);
@@ -12,8 +13,7 @@ export const programController = {
   },
 
   getAll: async (req, res) => {
-    const data = await programService.getAll();
-    res.json(data);
+    res.json(await programService.getAll());
   },
 
   getById: async (req, res) => {
@@ -39,4 +39,33 @@ export const programController = {
       res.status(400).json({ message: err.message });
     }
   },
+
+  // ===== CHILD CREATE =====
+  createEdu: async (req, res) => {
+    try {
+      const data = await programService.createEdu(req.body);
+      res.json({ message: "Tạo EDU child thành công", data });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+
+  createSport: async (req, res) => {
+    try {
+      const data = await programService.createSport(req.body);
+      res.json({ message: "Tạo SPORT child thành công", data });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+
+  createTeacher: async (req, res) => {
+    try {
+      const data = await programService.createTeacher(req.body);
+      res.json({ message: "Tạo TEACHER child thành công", data });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+
 };

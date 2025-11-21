@@ -2,34 +2,53 @@ import { models } from "../models/index.js";
 
 export const programService = {
 
-  // ======= CREATE =======
-  createProgram: async (data) => {
-    const { name, description, type, detail } = data;
-
-    // 1. Tạo bảng Program
-    const program = await models.Program.create({ name, description, type });
-
-    // 2. Tạo bảng con theo type
-    await programService.createChildData(type, program.id, detail);
-
-    return program;
+  // ======= CREATE PROGRAM =======
+  createProgram: async ({ name, description, type }) => {
+    return await models.Program.create({ name, description, type });
   },
 
+  // ======= CREATE CHILD =======
+  createEdu: async (data) => {
+    const { program_id } = data;
+    if (!program_id) throw new Error("program_id is required");
 
-  createChildData: async (type, program_id, detail) => {
-    if (type === "edu") {
-      return await models.ProgramEdu.create({ program_id, ...detail });
+    const parent = await models.Program.findByPk(program_id);
+    if (!parent) throw new Error("Parent program not found");
+
+    if (parent.type !== "edu") {
+      throw new Error(`Parent program type mismatch: expected "edu", got "${parent.type}"`);
     }
-    if (type === "sport") {
-      return await models.ProgramSport.create({ program_id, ...detail });
-    }
-    if (type === "teacher") {
-      return await models.ProgramTeacher.create({ program_id, ...detail });
-    }
-    throw new Error("Invalid program type");
+
+    return await models.ProgramEdu.create(data);
   },
 
+  createSport: async (data) => {
+    const { program_id } = data;
+    if (!program_id) throw new Error("program_id is required");
 
+    const parent = await models.Program.findByPk(program_id);
+    if (!parent) throw new Error("Parent program not found");
+
+    if (parent.type !== "sport") {
+      throw new Error(`Parent program type mismatch: expected "sport", got "${parent.type}"`);
+    }
+
+    return await models.ProgramSport.create(data);
+  },
+
+  createTeacher: async (data) => {
+    const { program_id } = data;
+    if (!program_id) throw new Error("program_id is required");
+
+    const parent = await models.Program.findByPk(program_id);
+    if (!parent) throw new Error("Parent program not found");
+
+    if (parent.type !== "teacher") {
+      throw new Error(`Parent program type mismatch: expected "teacher", got "${parent.type}"`);
+    }
+
+    return await models.ProgramTeacher.create(data);
+  },
   // ======= GET ALL =======
   getAll: async () => {
     return await models.Program.findAll({
@@ -41,8 +60,7 @@ export const programService = {
     });
   },
 
-
-  // ======= GET DETAIL =======
+  // ======= GET ONE =======
   getById: async (id) => {
     return await models.Program.findByPk(id, {
       include: [
@@ -53,62 +71,31 @@ export const programService = {
     });
   },
 
-
   // ======= UPDATE =======
   updateProgram: async (id, data) => {
     const program = await models.Program.findByPk(id);
     if (!program) throw new Error("Program not found");
 
-    const { name, description, detail } = data;
-
-    await program.update({ name, description });
-
-    // Cập nhật bảng con theo type
-    await programService.updateChildData(program.type, id, detail);
+    await program.update({
+      name: data.name,
+      description: data.description,
+    });
 
     return program;
   },
-
-
-  updateChildData: async (type, program_id, detail) => {
-    if (!detail) return;
-
-    if (type === "edu") {
-      return await models.ProgramEdu.update(detail, { where: { program_id } });
-    }
-    if (type === "sport") {
-      return await models.ProgramSport.update(detail, { where: { program_id } });
-    }
-    if (type === "teacher") {
-      return await models.ProgramTeacher.update(detail, { where: { program_id } });
-    }
-  },
-
 
   // ======= DELETE =======
   deleteProgram: async (id) => {
     const program = await models.Program.findByPk(id);
     if (!program) throw new Error("Program not found");
 
-    // Xóa bảng con trước
-    await programService.deleteChildData(program.type, id);
+    // Xóa child theo type
+    await models.ProgramEdu.destroy({ where: { program_id: id } });
+    await models.ProgramSport.destroy({ where: { program_id: id } });
+    await models.ProgramTeacher.destroy({ where: { program_id: id } });
 
-    // Xóa bảng Program
     await program.destroy();
-
     return true;
   },
 
-
-  deleteChildData: async (type, program_id) => {
-    if (type === "edu") {
-      return await models.ProgramEdu.destroy({ where: { program_id } });
-    }
-    if (type === "sport") {
-      return await models.ProgramSport.destroy({ where: { program_id } });
-    }
-    if (type === "teacher") {
-      return await models.ProgramTeacher.destroy({ where: { program_id } });
-    }
-  },
 };

@@ -9,4 +9,7 @@ router.get("/:id", programController.getById);
 router.put("/:id", programController.update);
 router.delete("/:id", programController.delete);
 
+router.post("/edu", programController.createEdu);
+router.post("/sport", programController.createSport);
+router.post("/teacher", programController.createTeacher);
 export default router;
