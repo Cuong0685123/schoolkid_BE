@@ -10,6 +10,7 @@ import newsArticleRoutes from "./routes/newsArticle.routes.js";
 import applicationRoutes from "./routes/application.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import programRoutes from "./routes/program.routes.js";
+import siteContentRoutes from "./routes/siteContent.routes.js";
 const app = express();
 
 app.use(helmet());
@@ -18,6 +19,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // ROUTES
+app.use("/api/site-content", siteContentRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/news-articles", newsArticleRoutes);
