@@ -4,11 +4,11 @@ import helmet from "helmet";
 import morgan from "morgan";
 
 // ROUTES
+import newsletterRoutes from "./routes/newsletterSubscriber.routes.js";
 import commentRoutes from "./routes/comment.routes.js";
 import newsArticleRoutes from "./routes/newsArticle.routes.js";
 import applicationRoutes from "./routes/application.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
-import router from "./routes/index.js";
 import programRoutes from "./routes/program.routes.js";
 const app = express();
 
@@ -18,6 +18,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // ROUTES
+app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/news-articles", newsArticleRoutes);
 app.use("/api/admin", adminRoutes);
