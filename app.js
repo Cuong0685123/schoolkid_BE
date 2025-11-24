@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 
 // ROUTES
+import commentRoutes from "./routes/comment.routes.js";
 import newsArticleRoutes from "./routes/newsArticle.routes.js";
 import applicationRoutes from "./routes/application.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
@@ -17,6 +18,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // ROUTES
+app.use("/api/comments", commentRoutes);
 app.use("/api/news-articles", newsArticleRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/programs", programRoutes);
