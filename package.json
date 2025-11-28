@@ -21,6 +21,7 @@
     "nodemon": "^3.1.10"
   },
   "scripts": {
+    "build": "npm build",
     "start": "node server.js"
   },
   "type": "module",
