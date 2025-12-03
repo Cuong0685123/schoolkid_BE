@@ -5,13 +5,11 @@ export const adminController = {
     try {
       const { username, password } = req.body;
 
-      if (!username || !password)
-        return res.status(400).json({ message: "Thiếu username hoặc password" });
-
       const admin = await adminService.login(username, password);
 
-      if (!admin)
+      if (!admin) {
         return res.status(401).json({ message: "Sai tài khoản hoặc mật khẩu" });
+      }
 
       return res.json({
         message: "Đăng nhập thành công",
@@ -20,22 +18,22 @@ export const adminController = {
           username: admin.username,
         },
       });
+
     } catch (err) {
       console.error(err);
       return res.status(500).json({ message: "Lỗi server" });
     }
   },
-   register: async (req, res) => {
+
+  register: async (req, res) => {
     try {
       const { username, password } = req.body;
 
-      if (!username || !password)
-        return res.status(400).json({ message: "Thiếu username hoặc password" });
-
       const newAdmin = await adminService.register(username, password);
 
-      if (!newAdmin)
+      if (!newAdmin) {
         return res.status(400).json({ message: "Username đã tồn tại" });
+      }
 
       return res.status(201).json({
         message: "Tạo tài khoản admin thành công",
@@ -44,9 +42,10 @@ export const adminController = {
           username: newAdmin.username,
         },
       });
+
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: "Lỗi server" });
+      return res.status(500).json({ message: "Lỗi server" });
     }
-    },
+  },
 };
