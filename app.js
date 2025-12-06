@@ -13,6 +13,7 @@ import adminRoutes from "./routes/admin.routes.js";
 import programRoutes from "./routes/program.routes.js";
 import siteContentRoutes from "./routes/siteContent.routes.js";
 import oauthRoutes from "./routes/oauth2.routes.js";
+import index from "./routes/index.js";
 const app = express();
 
 app.use(helmet());
@@ -21,7 +22,8 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // ROUTES
-app.use("/", oauthRoutes);
+app.use("/",index);
+//app.use("/", oauthRoutes);
 app.use("/api/promotional-video", promotionalVideoRoutes);
 app.use("/api/site-content", siteContentRoutes);
 app.use("/api/newsletter", newsletterRoutes);
