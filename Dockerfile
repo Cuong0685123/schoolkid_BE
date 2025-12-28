@@ -1,26 +1,36 @@
-# Base image (nhẹ + ổn định cho MySQL2)
-FROM node:20-alpine
+# --- GIAI ĐOẠN 1: BUILD (Xây dựng) ---
+FROM node:20-alpine AS builder
 
-# Cài môi trường build MySQL2
-RUN apk add --no-cache python3 make g++ bash
+# Cài đặt các công cụ cần thiết để biên dịch native modules (bcrypt, mysql2)
+RUN apk add --no-cache python3 make g++
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files trước
+# Copy các file quản lý thư viện trước
 COPY package*.json ./
 
-# Cài dependencies
-RUN npm install --production
+# Cài đặt tất cả dependencies (bao gồm cả devDependencies nếu cần để build)
+RUN npm install
 
-# Copy source code
+# Copy toàn bộ mã nguồn vào
 COPY . .
 
-# Render sẽ inject ENV -> dotenv tự đọc được
-ENV NODE_ENV=production
+# --- GIAI ĐOẠN 2: PRODUCTION (Chạy thực tế) ---
+FROM node:20-alpine
 
-# Expose PORT (Render sẽ map)
+WORKDIR /app
+
+# Chỉ copy những thứ cần thiết từ stage builder sang
+# Điều này giúp loại bỏ hoàn toàn python, g++, make khỏi image cuối cùng
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app ./
+
+# Thiết lập các biến môi trường khớp với file .env của bạn
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Mở cổng 3000
 EXPOSE 3000
 
-# Start server
+# Chạy ứng dụng bằng lệnh node (không dùng nodemon trong production)
 CMD ["node", "server.js"]
