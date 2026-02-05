@@ -79,6 +79,7 @@ export const programService = {
     await program.update({
       name: data.name,
       description: data.description,
+      type: data.type,
     });
 
     return program;
