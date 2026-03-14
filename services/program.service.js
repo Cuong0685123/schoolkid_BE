@@ -11,14 +11,15 @@ export const programService = {
   createEdu: async (data) => {
     const { program_id } = data;
     if (!program_id) throw new Error("program_id is required");
-
+    
     const parent = await models.Program.findByPk(program_id);
     if (!parent) throw new Error("Parent program not found");
-
+    
     if (parent.type !== "edu") {
       throw new Error(`Parent program type mismatch: expected "edu", got "${parent.type}"`);
     }
-
+    
+    console.log("data: ", data);
     return await models.ProgramEdu.create(data);
   },
 
@@ -49,6 +50,26 @@ export const programService = {
 
     return await models.ProgramTeacher.create(data);
   },
+
+  // ======= UPDATE CHILD =======
+  updateEdu: async (id, data) => {
+    const education = await models.ProgramEdu.findByPk(id);
+    if (!education) throw new Error("Education not found");
+    return await education.update(data);
+  },
+
+  updateSport: async (id, data) => {
+    const sport = await models.ProgramSport.findByPk(id);
+    if (!sport) throw new Error("Sport not found");
+    return await sport.update(data);
+  },
+
+  updateTeacher: async (id, data) => {
+    const teacher = await models.ProgramTeacher.findByPk(id);
+    if (!teacher) throw new Error("Teacher not found");
+    return await teacher.update(data);
+  },
+
   // ======= GET ALL =======
   getAll: async () => {
     return await models.Program.findAll({

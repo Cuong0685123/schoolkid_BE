@@ -68,4 +68,32 @@ export const programController = {
     }
   },
 
+  // ===== CHILD UPDATE =====
+  updateEdu: async (req, res) => {
+    try {
+      const data = await programService.updateEdu(req.params.id, req.body);
+      res.json({ message: "Cập nhật EDU child thành công", data });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+
+  updateSport: async (req, res) => {
+    try {
+      const data = await programService.updateSport(req.params.id, req.body);
+      res.json({ message: "Cập nhật SPORT child thành công", data });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+
+  updateTeacher: async (req, res) => {
+    try {
+      const data = await programService.updateTeacher(req.params.id, req.body);
+      res.json({ message: "Cập nhật TEACHER child thành công", data });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+
 };
