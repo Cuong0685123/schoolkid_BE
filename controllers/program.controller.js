@@ -1,6 +1,14 @@
 import { programService } from "../services/program.service.js";
+import { uploadFile } from "../services/googleDrive.service.js";
+import multer from "multer";
+const upload = multer({ dest: "tmp/" });
 
 export const programController = {
+  // Middleware upload 2 file: video + thumbnail
+  uploadMiddleware: upload.fields([
+    { name: "thumbnailFile", maxCount: 1 },
+  ]),
+
 
   // ===== CREATE PROGRAM =====
   create: async (req, res) => {
@@ -43,7 +51,13 @@ export const programController = {
   // ===== CHILD CREATE =====
   createEdu: async (req, res) => {
     try {
-      const data = await programService.createEdu(req.body);
+      const file = req.file;
+      const thumbUploaded = await uploadFile(
+        file.path,
+        file.mimetype,
+        file.originalname
+      );
+      const data = await programService.createEdu({ ...req.body, thumbnail_url: thumbUploaded.webViewLink });
       res.json({ message: "Tạo EDU child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -96,4 +110,31 @@ export const programController = {
     }
   },
 
+  // ===== CHILD DELETE =====
+  deleteEdu: async (req, res) => {
+    try {
+      await programService.deleteEdu(req.params.id);
+      res.json({ message: "Xóa EDUCATION child thành công" });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+
+  deleteSport: async (req, res) => {
+    try {
+      await programService.deleteSport(req.params.id);
+      res.json({ message: "Xóa SPORT child thành công" });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+
+  deleteTeacher: async (req, res) => {
+    try {
+      await programService.deleteTeacher(req.params.id);
+      res.json({ message: "Xóa TEACHER child thành công" });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  },
 };

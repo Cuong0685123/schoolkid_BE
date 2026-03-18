@@ -1,6 +1,10 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({
+  path: process.env.NODE_ENV === 'production'
+    ? '.env.production'
+    : '.env.local'
+})
 
 export const sequelize = new Sequelize(
   process.env.DB_NAME,     // database

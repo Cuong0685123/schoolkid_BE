@@ -24,4 +24,8 @@ router.put("/education/:id", upload.single("thumbnail_url"), programController.u
 router.put("/sport/:id", upload.single("thumbnail_url"), programController.updateSport);
 router.put("/teacher/:id", upload.single("thumbnail_url"), programController.updateTeacher);
 
+router.delete("/education/:id", programController.deleteEdu);
+router.delete("/sport/:id", programController.deleteSport);
+router.delete("/teacher/:id", programController.deleteTeacher);
+
 export default router;

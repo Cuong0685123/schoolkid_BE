@@ -51,7 +51,7 @@ export const programService = {
     return await models.ProgramTeacher.create(data);
   },
 
-  // ======= UPDATE CHILD =======
+  // ======= UPDATE CHILD PROGRAM =======
   updateEdu: async (id, data) => {
     const education = await models.ProgramEdu.findByPk(id);
     if (!education) throw new Error("Education not found");
@@ -68,6 +68,25 @@ export const programService = {
     const teacher = await models.ProgramTeacher.findByPk(id);
     if (!teacher) throw new Error("Teacher not found");
     return await teacher.update(data);
+  },
+
+  // ======= DELETE CHILD PROGRAM =======
+  deleteEdu: async (id) => {
+    const education = await models.ProgramEdu.findByPk(id);
+    if (!education) throw new Error("Education not found");
+    return await education.destroy();
+  },
+  
+  deleteSport: async (id) => {
+    const sport = await models.ProgramSport.findByPk(id);
+    if (!sport) throw new Error("Sport not found");
+    return await sport.destroy();
+  },
+  
+  deleteTeacher: async (id) => {
+    const teacher = await models.ProgramTeacher.findByPk(id);
+    if (!teacher) throw new Error("Teacher not found");
+    return await teacher.destroy();
   },
 
   // ======= GET ALL =======
