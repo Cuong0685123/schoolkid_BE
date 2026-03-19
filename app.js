@@ -24,7 +24,7 @@ app.use(express.json());
 // ROUTES
 app.use("/",index);
 //app.use("/", oauthRoutes);
-app.use("/api/promotional-video", promotionalVideoRoutes);
+app.use("/api/promotional-videos", promotionalVideoRoutes);
 app.use("/api/site-content", siteContentRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/comments", commentRoutes);
