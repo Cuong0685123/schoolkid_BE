@@ -57,7 +57,7 @@ export const programController = {
         file.mimetype,
         file.originalname
       );
-      const data = await programService.createEdu({ ...req.body, thumbnail_url: thumbUploaded.webViewLink });
+      const data = await programService.createEdu({ ...req.body, thumbnail_url: thumbUploaded.url });
       res.json({ message: "Tạo EDU child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -66,7 +66,13 @@ export const programController = {
 
   createSport: async (req, res) => {
     try {
-      const data = await programService.createSport(req.body);
+      const file = req.file;
+      const thumbUploaded = await uploadFile(
+        file.path,
+        file.mimetype,
+        file.originalname
+      );
+      const data = await programService.createSport({...req.body, thumbnail_url: thumbUploaded.url});
       res.json({ message: "Tạo SPORT child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -75,7 +81,13 @@ export const programController = {
 
   createTeacher: async (req, res) => {
     try {
-      const data = await programService.createTeacher(req.body);
+      const file = req.file;
+      const thumbUploaded = await uploadFile(
+        file.path,
+        file.mimetype,
+        file.originalname
+      );
+      const data = await programService.createTeacher({...req.body, profile_image_url: thumbUploaded.url});
       res.json({ message: "Tạo TEACHER child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
