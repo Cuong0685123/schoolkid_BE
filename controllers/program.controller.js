@@ -99,13 +99,17 @@ export const programController = {
     try {
       let updateData = { ...req.body };
       const file = req.file;
-      const thumbUploaded = await uploadFile(
-        file.path,
-        file.mimetype,
-        file.originalname
-      );
-      updateData.thumbnail_url = thumbUploaded.url;
+      if (file) {
+        const thumbUploaded = await uploadFile(
+          req.file.path,
+          req.file.mimetype,
+          req.file.originalname
+        );
+
+        updateData.thumbnail_url = thumbUploaded.url;
+      }
       const data = await programService.updateEdu(req.params.id, updateData);
+      console.log("Updated EDU data:", data); // ✅ log dữ liệu trả về
 
       res.json({ message: "Cập nhật EDU child thành công", data });
 
@@ -116,7 +120,18 @@ export const programController = {
 
   updateSport: async (req, res) => {
     try {
-      const data = await programService.updateSport(req.params.id, req.body);
+      let updateData = { ...req.body };
+      const file = req.file;
+      if (file) {
+        const thumbUploaded = await uploadFile(
+          req.file.path,
+          req.file.mimetype,
+          req.file.originalname
+        );
+
+        updateData.thumbnail_url = thumbUploaded.url;
+      }
+      const data = await programService.updateSport(req.params.id, updateData);
       res.json({ message: "Cập nhật SPORT child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
