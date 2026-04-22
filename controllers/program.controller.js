@@ -6,7 +6,7 @@ const upload = multer({ dest: "tmp/" });
 export const programController = {
   // Middleware upload 2 file: video + thumbnail
   uploadMiddleware: upload.fields([
-    { name: "thumbnailFile", maxCount: 1 },
+    { name: "thumbnail_url", maxCount: 1 },
   ]),
 
 
@@ -72,7 +72,7 @@ export const programController = {
         file.mimetype,
         file.originalname
       );
-      const data = await programService.createSport({...req.body, thumbnail_url: thumbUploaded.url});
+      const data = await programService.createSport({ ...req.body, thumbnail_url: thumbUploaded.url });
       res.json({ message: "Tạo SPORT child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -87,7 +87,7 @@ export const programController = {
         file.mimetype,
         file.originalname
       );
-      const data = await programService.createTeacher({...req.body, profile_image_url: thumbUploaded.url});
+      const data = await programService.createTeacher({ ...req.body, profile_image_url: thumbUploaded.url });
       res.json({ message: "Tạo TEACHER child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -97,8 +97,18 @@ export const programController = {
   // ===== CHILD UPDATE =====
   updateEdu: async (req, res) => {
     try {
-      const data = await programService.updateEdu(req.params.id, req.body);
+      let updateData = { ...req.body };
+      const file = req.file;
+      const thumbUploaded = await uploadFile(
+        file.path,
+        file.mimetype,
+        file.originalname
+      );
+      updateData.thumbnail_url = thumbUploaded.url;
+      const data = await programService.updateEdu(req.params.id, updateData);
+
       res.json({ message: "Cập nhật EDU child thành công", data });
+
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
