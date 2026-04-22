@@ -140,7 +140,20 @@ export const programController = {
 
   updateTeacher: async (req, res) => {
     try {
-      const data = await programService.updateTeacher(req.params.id, req.body);
+      let updateData = { ...req.body };
+      const file = req.file;
+      if (file) {
+        const thumbUploaded = await uploadFile(
+          req.file.path,
+          req.file.mimetype,
+          req.file.originalname
+        );
+
+        updateData.profile_image_url = thumbUploaded.url;
+      }
+      const data = await programService.updateTeacher(req.params.id, updateData);
+      console.log("data: ", data);
+      
       res.json({ message: "Cập nhật TEACHER child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
