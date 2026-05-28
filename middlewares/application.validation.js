@@ -22,7 +22,7 @@ export const validateApplicationCreate = (req, res, next) => {
 
   // Email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(parent_email))
+  if (!emailRegex.test(parent_email.trim()))
     return res.status(400).json({ message: "Email không hợp lệ" });
 
   // Phone format (VN)
@@ -48,7 +48,7 @@ export const validateApplicationUpdate = (req, res, next) => {
   // Email nếu có
   if (parent_email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(parent_email))
+    if (!emailRegex.test(parent_email.trim()))
       return res.status(400).json({ message: "Email không hợp lệ" });
   }
 
