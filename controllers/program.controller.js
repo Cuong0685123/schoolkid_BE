@@ -6,7 +6,7 @@ const upload = multer({ dest: "tmp/" });
 export const programController = {
   // Middleware upload 2 file: video + thumbnail
   uploadMiddleware: upload.fields([
-    { name: "thumbnailFile", maxCount: 1 },
+    { name: "thumbnail_url", maxCount: 1 },
   ]),
 
 
@@ -57,7 +57,7 @@ export const programController = {
         file.mimetype,
         file.originalname
       );
-      const data = await programService.createEdu({ ...req.body, thumbnail_url: thumbUploaded.webViewLink });
+      const data = await programService.createEdu({ ...req.body, thumbnail_url: thumbUploaded.url });
       res.json({ message: "Tạo EDU child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -66,7 +66,13 @@ export const programController = {
 
   createSport: async (req, res) => {
     try {
-      const data = await programService.createSport(req.body);
+      const file = req.file;
+      const thumbUploaded = await uploadFile(
+        file.path,
+        file.mimetype,
+        file.originalname
+      );
+      const data = await programService.createSport({ ...req.body, thumbnail_url: thumbUploaded.url });
       res.json({ message: "Tạo SPORT child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -75,7 +81,13 @@ export const programController = {
 
   createTeacher: async (req, res) => {
     try {
-      const data = await programService.createTeacher(req.body);
+      const file = req.file;
+      const thumbUploaded = await uploadFile(
+        file.path,
+        file.mimetype,
+        file.originalname
+      );
+      const data = await programService.createTeacher({ ...req.body, profile_image_url: thumbUploaded.url });
       res.json({ message: "Tạo TEACHER child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -85,8 +97,22 @@ export const programController = {
   // ===== CHILD UPDATE =====
   updateEdu: async (req, res) => {
     try {
-      const data = await programService.updateEdu(req.params.id, req.body);
+      let updateData = { ...req.body };
+      const file = req.file;
+      if (file) {
+        const thumbUploaded = await uploadFile(
+          req.file.path,
+          req.file.mimetype,
+          req.file.originalname
+        );
+
+        updateData.thumbnail_url = thumbUploaded.url;
+      }
+      const data = await programService.updateEdu(req.params.id, updateData);
+      console.log("Updated EDU data:", data); // ✅ log dữ liệu trả về
+
       res.json({ message: "Cập nhật EDU child thành công", data });
+
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -94,7 +120,18 @@ export const programController = {
 
   updateSport: async (req, res) => {
     try {
-      const data = await programService.updateSport(req.params.id, req.body);
+      let updateData = { ...req.body };
+      const file = req.file;
+      if (file) {
+        const thumbUploaded = await uploadFile(
+          req.file.path,
+          req.file.mimetype,
+          req.file.originalname
+        );
+
+        updateData.thumbnail_url = thumbUploaded.url;
+      }
+      const data = await programService.updateSport(req.params.id, updateData);
       res.json({ message: "Cập nhật SPORT child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -103,7 +140,20 @@ export const programController = {
 
   updateTeacher: async (req, res) => {
     try {
-      const data = await programService.updateTeacher(req.params.id, req.body);
+      let updateData = { ...req.body };
+      const file = req.file;
+      if (file) {
+        const thumbUploaded = await uploadFile(
+          req.file.path,
+          req.file.mimetype,
+          req.file.originalname
+        );
+
+        updateData.profile_image_url = thumbUploaded.url;
+      }
+      const data = await programService.updateTeacher(req.params.id, updateData);
+      console.log("data: ", data);
+      
       res.json({ message: "Cập nhật TEACHER child thành công", data });
     } catch (err) {
       res.status(400).json({ message: err.message });

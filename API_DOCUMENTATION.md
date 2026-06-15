@@ -195,7 +195,7 @@
 }
 ```
 
-### POST `/api/programs/edu` - Tạo chương trình giáo dục
+### POST `/api/programs/education` - Tạo chương trình giáo dục
 **Validation:** `validateProgramChild`
 
 **Request Body:**
@@ -212,6 +212,24 @@
 }
 ```
 
+### PUT `/api/programs/education/:id` - Cập nhật chương trình giáo dục
+
+**Request Body:** (Tất cả các field đều optional, gửi field cần cập nhật)
+```json
+{
+  "program_id": "integer (optional)",
+  "title": "string (optional)",
+  "detail": "string (optional, TEXT)",
+  "thumbnail_url": "string (optional)",
+  "age_group": "string (optional)",
+  "duration_days": "string (optional)",
+  "duration_hours": "string (optional)",
+  "slug": "string (optional)"
+}
+```
+
+### DELETE `/api/programs/education/:id` - Xóa chương trình giáo dục
+
 ### POST `/api/programs/sport` - Tạo chương trình thể thao
 **Validation:** `validateProgramChild`
 
@@ -226,6 +244,21 @@
 }
 ```
 
+### PUT `/api/programs/sport/:id` - Cập nhật chương trình thể thao
+
+**Request Body:** (Tất cả các field đều optional, gửi field cần cập nhật)
+```json
+{
+  "program_id": "integer (optional)",
+  "title": "string (optional)",
+  "detail": "string (optional, TEXT)",
+  "thumbnail_url": "string (optional)",
+  "slug": "string (optional)"
+}
+```
+
+### DELETE `/api/programs/sport/:id` - Xóa chương trình thể thao
+
 ### POST `/api/programs/teacher` - Tạo chương trình giáo viên
 **Validation:** `validateProgramChild`
 
@@ -239,6 +272,21 @@
   "bio": "string (optional, TEXT)"
 }
 ```
+
+### PUT `/api/programs/teacher/:id` - Cập nhật chương trình giáo viên
+
+**Request Body:** (Tất cả các field đều optional, gửi field cần cập nhật)
+```json
+{
+  "program_id": "integer (optional)",
+  "full_name": "string (optional)",
+  "profile_image_url": "string (optional)",
+  "role": "string (optional)",
+  "bio": "string (optional, TEXT)"
+}
+```
+
+### DELETE `/api/programs/teacher/:id` - Xóa chương trình giáo viên
 
 ### GET `/api/programs` - Lấy tất cả chương trình
 ### GET `/api/programs/:id` - Lấy chương trình theo ID
