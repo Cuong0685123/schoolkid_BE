@@ -1,14 +1,14 @@
 import express from "express";
+import multer from "multer";
 import { programController } from "../controllers/program.controller.js";
 import {
   validateProgramCreate,
   validateProgramUpdate,
-  validateProgramChild
+  validateProgramChild,
 } from "../middlewares/program.validation.js";
-import multer from "multer";
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "tmp/" });
 
 // ===== CHILD ROUTES - đặt trước /:id =====
 router.post(
@@ -27,7 +27,7 @@ router.post(
 
 router.post(
   "/teacher",
-  upload.single("thumbnail_url"),
+  upload.single("profile_image_url"),
   validateProgramChild,
   programController.createTeacher
 );
@@ -46,7 +46,7 @@ router.put(
 
 router.put(
   "/teacher/:id",
-  upload.single("thumbnail_url"),
+  upload.single("profile_image_url"),
   programController.updateTeacher
 );
 
@@ -54,24 +54,11 @@ router.delete("/education/:id", programController.deleteEdu);
 router.delete("/sport/:id", programController.deleteSport);
 router.delete("/teacher/:id", programController.deleteTeacher);
 
-// ===== PARENT ROUTES - đặt sau cùng =====
+// ===== PARENT ROUTES =====
 router.post("/", validateProgramCreate, programController.create);
 router.get("/", programController.getAll);
 router.get("/:id", programController.getById);
 router.put("/:id", validateProgramUpdate, programController.update);
 router.delete("/:id", programController.delete);
-
-
-router.post("/education", upload.single("thumbnail_url"), validateProgramChild, programController.createEdu);
-router.post("/sport", upload.single("thumbnail_url"), validateProgramChild, programController.createSport);
-router.post("/teacher", upload.single("profile_image_url"), validateProgramChild, programController.createTeacher);
-
-router.put("/education/:id", upload.single("thumbnail_url"), programController.updateEdu);
-router.put("/sport/:id", upload.single("thumbnail_url"), programController.updateSport);
-router.put("/teacher/:id", upload.single("profile_image_url"), programController.updateTeacher);
-
-router.delete("/education/:id", programController.deleteEdu);
-router.delete("/sport/:id", programController.deleteSport);
-router.delete("/teacher/:id", programController.deleteTeacher);
 
 export default router;

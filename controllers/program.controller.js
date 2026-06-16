@@ -1,16 +1,29 @@
+import fs from "fs";
 import { programService } from "../services/program.service.js";
 import { uploadFile } from "../services/googleDrive.service.js";
-import multer from "multer";
-const upload = multer({ dest: "tmp/" });
+
+const removeTempFile = (filePath) => {
+  if (filePath && fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+};
+
+const uploadImageIfExists = async (file) => {
+  if (!file) return null;
+
+  const uploaded = await uploadFile(
+    file.path,
+    file.mimetype,
+    file.originalname
+  );
+
+  removeTempFile(file.path);
+
+  return uploaded.url;
+};
 
 export const programController = {
-  // Middleware upload 2 file: video + thumbnail
-  uploadMiddleware: upload.fields([
-    { name: "thumbnail_url", maxCount: 1 },
-  ]),
-
-
-  // ===== CREATE PROGRAM =====
+  // ===== PARENT PROGRAM =====
   create: async (req, res) => {
     try {
       const program = await programService.createProgram(req.body);
@@ -21,13 +34,23 @@ export const programController = {
   },
 
   getAll: async (req, res) => {
-    res.json(await programService.getAll());
+    try {
+      const data = await programService.getAll();
+      res.json(data);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   },
 
   getById: async (req, res) => {
-    const data = await programService.getById(req.params.id);
-    if (!data) return res.status(404).json({ message: "Không tìm thấy" });
-    res.json(data);
+    try {
+      const data = await programService.getById(req.params.id);
+      if (!data) return res.status(404).json({ message: "Không tìm thấy" });
+
+      res.json(data);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   },
 
   update: async (req, res) => {
@@ -51,45 +74,48 @@ export const programController = {
   // ===== CHILD CREATE =====
   createEdu: async (req, res) => {
     try {
-      const file = req.file;
-      const thumbUploaded = await uploadFile(
-        file.path,
-        file.mimetype,
-        file.originalname
-      );
-      const data = await programService.createEdu({ ...req.body, thumbnail_url: thumbUploaded.url });
+      const thumbnailUrl = await uploadImageIfExists(req.file);
+
+      const data = await programService.createEdu({
+        ...req.body,
+        thumbnail_url: thumbnailUrl || req.body.thumbnail_url,
+      });
+
       res.json({ message: "Tạo EDU child thành công", data });
     } catch (err) {
+      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
 
   createSport: async (req, res) => {
     try {
-      const file = req.file;
-      const thumbUploaded = await uploadFile(
-        file.path,
-        file.mimetype,
-        file.originalname
-      );
-      const data = await programService.createSport({ ...req.body, thumbnail_url: thumbUploaded.url });
+      const thumbnailUrl = await uploadImageIfExists(req.file);
+
+      const data = await programService.createSport({
+        ...req.body,
+        thumbnail_url: thumbnailUrl || req.body.thumbnail_url,
+      });
+
       res.json({ message: "Tạo SPORT child thành công", data });
     } catch (err) {
+      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
 
   createTeacher: async (req, res) => {
     try {
-      const file = req.file;
-      const thumbUploaded = await uploadFile(
-        file.path,
-        file.mimetype,
-        file.originalname
-      );
-      const data = await programService.createTeacher({ ...req.body, profile_image_url: thumbUploaded.url });
+      const profileImageUrl = await uploadImageIfExists(req.file);
+
+      const data = await programService.createTeacher({
+        ...req.body,
+        profile_image_url: profileImageUrl || req.body.profile_image_url,
+      });
+
       res.json({ message: "Tạo TEACHER child thành công", data });
     } catch (err) {
+      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
@@ -97,65 +123,51 @@ export const programController = {
   // ===== CHILD UPDATE =====
   updateEdu: async (req, res) => {
     try {
-      let updateData = { ...req.body };
-      const file = req.file;
-      if (file) {
-        const thumbUploaded = await uploadFile(
-          req.file.path,
-          req.file.mimetype,
-          req.file.originalname
-        );
+      const updateData = { ...req.body };
+      const thumbnailUrl = await uploadImageIfExists(req.file);
 
-        updateData.thumbnail_url = thumbUploaded.url;
+      if (thumbnailUrl) {
+        updateData.thumbnail_url = thumbnailUrl;
       }
+
       const data = await programService.updateEdu(req.params.id, updateData);
-      console.log("Updated EDU data:", data); // ✅ log dữ liệu trả về
-
       res.json({ message: "Cập nhật EDU child thành công", data });
-
     } catch (err) {
+      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
 
   updateSport: async (req, res) => {
     try {
-      let updateData = { ...req.body };
-      const file = req.file;
-      if (file) {
-        const thumbUploaded = await uploadFile(
-          req.file.path,
-          req.file.mimetype,
-          req.file.originalname
-        );
+      const updateData = { ...req.body };
+      const thumbnailUrl = await uploadImageIfExists(req.file);
 
-        updateData.thumbnail_url = thumbUploaded.url;
+      if (thumbnailUrl) {
+        updateData.thumbnail_url = thumbnailUrl;
       }
+
       const data = await programService.updateSport(req.params.id, updateData);
       res.json({ message: "Cập nhật SPORT child thành công", data });
     } catch (err) {
+      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
 
   updateTeacher: async (req, res) => {
     try {
-      let updateData = { ...req.body };
-      const file = req.file;
-      if (file) {
-        const thumbUploaded = await uploadFile(
-          req.file.path,
-          req.file.mimetype,
-          req.file.originalname
-        );
+      const updateData = { ...req.body };
+      const profileImageUrl = await uploadImageIfExists(req.file);
 
-        updateData.profile_image_url = thumbUploaded.url;
+      if (profileImageUrl) {
+        updateData.profile_image_url = profileImageUrl;
       }
+
       const data = await programService.updateTeacher(req.params.id, updateData);
-      console.log("data: ", data);
-      
       res.json({ message: "Cập nhật TEACHER child thành công", data });
     } catch (err) {
+      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
