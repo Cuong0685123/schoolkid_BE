@@ -18,37 +18,54 @@ export const promotionalVideoController = {
   // CREATE
   create: async (req, res) => {
     try {
-      const { title } = req.body;
+      const { title, video_url } = req.body;
 
-      if (!req.files?.videoFile || !req.files?.thumbnailFile) {
-        return res.status(400).json({ message: "Thiếu file upload" });
+      if (!title) {
+        return res.status(400).json({ message: "Thiếu tiêu đề" });
       }
 
-      const videoFile = req.files.videoFile[0];
-      const thumbFile = req.files.thumbnailFile[0];
+      if (!video_url && !req.files?.videoFile) {
+        return res.status(400).json({ message: "Thiếu video URL hoặc video file" });
+      }
 
-      const videoUploaded = await uploadFile(
-        videoFile.path,
-        videoFile.mimetype,
-        videoFile.originalname
-      );
+      let videoUrl = video_url || "";
+      let thumbUrl = "";
 
-      const thumbUploaded = await uploadFile(
-        thumbFile.path,
-        thumbFile.mimetype,
-        thumbFile.originalname
-      );
+      // Nếu không có Youtube URL thì dùng upload video file cũ
+      if (!videoUrl && req.files?.videoFile) {
+        const videoFile = req.files.videoFile[0];
+
+        const videoUploaded = await uploadFile(
+          videoFile.path,
+          videoFile.mimetype,
+          videoFile.originalname
+        );
+
+        videoUrl = videoUploaded.url;
+        fs.unlinkSync(videoFile.path);
+      }
+
+      // Thumbnail vẫn upload lên Google Drive nếu có
+      if (req.files?.thumbnailFile) {
+        const thumbFile = req.files.thumbnailFile[0];
+
+        const thumbUploaded = await uploadFile(
+          thumbFile.path,
+          thumbFile.mimetype,
+          thumbFile.originalname
+        );
+
+        thumbUrl = thumbUploaded.url;
+        fs.unlinkSync(thumbFile.path);
+      }
 
       const record = await models.PromotionalVideo.create({
         title,
-        video_url: videoUploaded.url,
-        thumbnail_image_url: thumbUploaded.url,
+        video_url: videoUrl,
+        thumbnail_image_url: thumbUrl,
       });
 
-      fs.unlinkSync(videoFile.path);
-      fs.unlinkSync(thumbFile.path);
-
-      res.json({ message: "Upload thành công", record });
+      res.json({ message: "Tạo video thành công", record });
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
@@ -85,7 +102,7 @@ export const promotionalVideoController = {
   update: async (req, res) => {
     try {
       const { id } = req.params;
-      const { title } = req.body;
+      const { title, video_url } = req.body;
 
       const video = await models.PromotionalVideo.findByPk(id);
 
@@ -96,13 +113,14 @@ export const promotionalVideoController = {
       let videoUrl = video.video_url;
       let thumbUrl = video.thumbnail_image_url;
 
-      // update video
-      if (req.files?.videoFile) {
-        const file = req.files.videoFile[0];
+      // Nếu nhập Youtube URL mới thì dùng URL đó
+      if (video_url) {
+        videoUrl = video_url;
+      }
 
-        // // ❌ xóa file cũ
-        // const oldId = extractFileId(video.video_url);
-        // if (oldId) await deleteFile(oldId);
+      // Nếu không nhập Youtube URL nhưng có upload videoFile thì dùng flow cũ
+      if (!video_url && req.files?.videoFile) {
+        const file = req.files.videoFile[0];
 
         const uploaded = await uploadFile(
           file.path,
@@ -143,7 +161,7 @@ export const promotionalVideoController = {
     }
   },
 
-  // DELETE (🔥 thêm luôn cho bạn)
+  // DELETE
   delete: async (req, res) => {
     try {
       const video = await models.PromotionalVideo.findByPk(req.params.id);
@@ -152,10 +170,10 @@ export const promotionalVideoController = {
         return res.status(404).json({ message: "Không tìm thấy" });
       }
 
-      const videoId = extractFileId(video.video_url);
       const thumbId = extractFileId(video.thumbnail_image_url);
 
-      if (videoId) await deleteFile(videoId);
+      // Chỉ xóa thumbnail Google Drive.
+      // Không xóa video_url vì video YouTube không thuộc Google Drive.
       if (thumbId) await deleteFile(thumbId);
 
       await video.destroy();

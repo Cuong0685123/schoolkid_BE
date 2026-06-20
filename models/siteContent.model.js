@@ -14,6 +14,8 @@ export default (sequelize) => {
       stat_awards_info: DataTypes.STRING,
       footer_description: DataTypes.TEXT,
       about_section_quote: DataTypes.TEXT,
+      hero_image_url: DataTypes.STRING,
+about_image_url: DataTypes.STRING,
     },
     { tableName: "site_content", timestamps: false }
   );
