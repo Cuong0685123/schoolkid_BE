@@ -14,7 +14,6 @@ export const sequelize = new Sequelize(
     dialect: "mysql",
     dialectModule: mysql2,
     logging: false,
-
     dialectOptions: {
       ssl: {
         require: true,
