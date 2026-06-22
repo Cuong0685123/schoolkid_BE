@@ -42,8 +42,9 @@ export const initDatabase = async () => {
     await sequelize.sync();
     console.log("✔ All tables synced (auto-create / auto-update)");
   } catch (err) {
-    console.error("❌ Database error:", err);
-  }
+  console.error("❌ Database error:", err);
+  throw err;
+}
 };
 
 export { models, sequelize };
