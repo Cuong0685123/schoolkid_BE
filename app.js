@@ -1,7 +1,6 @@
 import express from "express";
-import cors from "cors";
-import helmet from "helmet";
 import morgan from "morgan";
+import { securityMiddlewares } from "./config/securityPolicies.js";
 
 // ROUTES
 import promotionalVideoRoutes from "./routes/promotionalVideo.routes.js";
@@ -17,20 +16,7 @@ import index from "./routes/index.js";
 
 const app = express();
 
-app.use(helmet());
-
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://schoolkid.vn"
-  ],
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
-
-app.options("*", cors());
+securityMiddlewares(app);
 
 app.use(morgan("dev"));
 app.use(express.json());
