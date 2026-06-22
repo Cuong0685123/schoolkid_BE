@@ -1,6 +1,7 @@
 import { google } from "googleapis";
-import fs from "fs";
+import { Readable } from "stream";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 const { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_REDIRECT_URI } = process.env;
@@ -11,12 +12,11 @@ const oauth2Client = new google.auth.OAuth2(
   OAUTH_REDIRECT_URI
 );
 
-const TOKEN_PATH = "./token.json";
 const PROMOTIONAL_FOLDER_ID = process.env.GOOGLE_PROMOTIONAL_FOLDER_ID;
 
-// Load token
-if (fs.existsSync(TOKEN_PATH)) {
-  const tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
+// Nếu có token trong ENV thì dùng token đó
+if (process.env.GOOGLE_TOKEN_JSON) {
+  const tokens = JSON.parse(process.env.GOOGLE_TOKEN_JSON);
   oauth2Client.setCredentials(tokens);
 }
 
@@ -29,17 +29,26 @@ export const getAuthUrl = () => {
   });
 };
 
-// Save token
+// Lấy token
 export const getToken = async (code) => {
   const { tokens } = await oauth2Client.getToken(code);
   oauth2Client.setCredentials(tokens);
 
-  fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens, null, 2));
-  console.log("✅ Token saved");
+  console.log("✅ Token generated:");
+  console.log(JSON.stringify(tokens, null, 2));
+
+  return tokens;
 };
 
-// ✅ Upload file (FIXED)
-export const uploadFile = async (filePath, mimeType, fileName) => {
+const bufferToStream = (buffer) => {
+  const stream = new Readable();
+  stream.push(buffer);
+  stream.push(null);
+  return stream;
+};
+
+// Upload file bằng buffer, hợp với Vercel
+export const uploadFile = async (fileBuffer, mimeType, fileName) => {
   const drive = google.drive({ version: "v3", auth: oauth2Client });
 
   const response = await drive.files.create({
@@ -49,14 +58,13 @@ export const uploadFile = async (filePath, mimeType, fileName) => {
     },
     media: {
       mimeType,
-      body: fs.createReadStream(filePath),
+      body: bufferToStream(fileBuffer),
     },
     fields: "id",
   });
 
   const fileId = response.data.id;
 
-  // ⭐ set public
   await drive.permissions.create({
     fileId,
     requestBody: {
@@ -71,14 +79,11 @@ export const uploadFile = async (filePath, mimeType, fileName) => {
   };
 };
 
-// ✅ delete file
 export const deleteFile = async (fileId) => {
   const drive = google.drive({ version: "v3", auth: oauth2Client });
-
   await drive.files.delete({ fileId });
 };
 
-// ✅ extract id từ url
 export const extractFileId = (url) => {
   const match = url?.match(/id=([^&]+)/);
   return match ? match[1] : null;

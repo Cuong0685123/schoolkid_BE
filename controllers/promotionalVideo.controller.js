@@ -1,5 +1,4 @@
 import multer from "multer";
-import fs from "fs";
 import {
   uploadFile,
   deleteFile,
@@ -7,7 +6,9 @@ import {
 } from "../services/googleDrive.service.js";
 import { models } from "../models/index.js";
 
-const upload = multer({ dest: "tmp/" });
+const upload = multer({
+  storage: multer.memoryStorage(),
+});
 
 export const promotionalVideoController = {
   uploadMiddleware: upload.fields([
@@ -15,7 +16,6 @@ export const promotionalVideoController = {
     { name: "thumbnailFile", maxCount: 1 },
   ]),
 
-  // CREATE
   create: async (req, res) => {
     try {
       const { title, video_url } = req.body;
@@ -31,32 +31,28 @@ export const promotionalVideoController = {
       let videoUrl = video_url || "";
       let thumbUrl = "";
 
-      // Nếu không có Youtube URL thì dùng upload video file cũ
       if (!videoUrl && req.files?.videoFile) {
         const videoFile = req.files.videoFile[0];
 
         const videoUploaded = await uploadFile(
-          videoFile.path,
+          videoFile.buffer,
           videoFile.mimetype,
           videoFile.originalname
         );
 
         videoUrl = videoUploaded.url;
-        fs.unlinkSync(videoFile.path);
       }
 
-      // Thumbnail vẫn upload lên Google Drive nếu có
       if (req.files?.thumbnailFile) {
         const thumbFile = req.files.thumbnailFile[0];
 
         const thumbUploaded = await uploadFile(
-          thumbFile.path,
+          thumbFile.buffer,
           thumbFile.mimetype,
           thumbFile.originalname
         );
 
         thumbUrl = thumbUploaded.url;
-        fs.unlinkSync(thumbFile.path);
       }
 
       const record = await models.PromotionalVideo.create({
@@ -71,7 +67,6 @@ export const promotionalVideoController = {
     }
   },
 
-  // GET ALL
   getAll: async (req, res) => {
     try {
       const data = await models.PromotionalVideo.findAll({
@@ -83,7 +78,6 @@ export const promotionalVideoController = {
     }
   },
 
-  // GET BY ID
   getById: async (req, res) => {
     try {
       const video = await models.PromotionalVideo.findByPk(req.params.id);
@@ -98,7 +92,6 @@ export const promotionalVideoController = {
     }
   },
 
-  // UPDATE
   update: async (req, res) => {
     try {
       const { id } = req.params;
@@ -113,26 +106,22 @@ export const promotionalVideoController = {
       let videoUrl = video.video_url;
       let thumbUrl = video.thumbnail_image_url;
 
-      // Nếu nhập Youtube URL mới thì dùng URL đó
       if (video_url) {
         videoUrl = video_url;
       }
 
-      // Nếu không nhập Youtube URL nhưng có upload videoFile thì dùng flow cũ
       if (!video_url && req.files?.videoFile) {
         const file = req.files.videoFile[0];
 
         const uploaded = await uploadFile(
-          file.path,
+          file.buffer,
           file.mimetype,
           file.originalname
         );
 
         videoUrl = uploaded.url;
-        fs.unlinkSync(file.path);
       }
 
-      // update thumbnail
       if (req.files?.thumbnailFile) {
         const file = req.files.thumbnailFile[0];
 
@@ -140,13 +129,12 @@ export const promotionalVideoController = {
         if (oldId) await deleteFile(oldId);
 
         const uploaded = await uploadFile(
-          file.path,
+          file.buffer,
           file.mimetype,
           file.originalname
         );
 
         thumbUrl = uploaded.url;
-        fs.unlinkSync(file.path);
       }
 
       await video.update({
@@ -161,7 +149,6 @@ export const promotionalVideoController = {
     }
   },
 
-  // DELETE
   delete: async (req, res) => {
     try {
       const video = await models.PromotionalVideo.findByPk(req.params.id);
@@ -172,8 +159,6 @@ export const promotionalVideoController = {
 
       const thumbId = extractFileId(video.thumbnail_image_url);
 
-      // Chỉ xóa thumbnail Google Drive.
-      // Không xóa video_url vì video YouTube không thuộc Google Drive.
       if (thumbId) await deleteFile(thumbId);
 
       await video.destroy();
