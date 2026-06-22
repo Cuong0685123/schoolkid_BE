@@ -1,5 +1,4 @@
 import multer from "multer";
-import fs from "fs";
 import { newsArticleService } from "../services/newsArticle.service.js";
 import {
   uploadFile,
@@ -7,7 +6,9 @@ import {
   extractFileId,
 } from "../services/googleDrive.service.js";
 
-const upload = multer({ dest: "tmp/" });
+const upload = multer({
+  storage: multer.memoryStorage(),
+});
 
 export const newsArticleController = {
   uploadMiddleware: upload.single("thumbnailFile"),
@@ -18,13 +19,12 @@ export const newsArticleController = {
 
       if (req.file) {
         const uploaded = await uploadFile(
-          req.file.path,
+          req.file.buffer,
           req.file.mimetype,
           req.file.originalname
         );
 
         payload.thumbnail_url = uploaded.url;
-        fs.unlinkSync(req.file.path);
       }
 
       const article = await newsArticleService.create(payload);
@@ -67,13 +67,12 @@ export const newsArticleController = {
         }
 
         const uploaded = await uploadFile(
-          req.file.path,
+          req.file.buffer,
           req.file.mimetype,
           req.file.originalname
         );
 
         payload.thumbnail_url = uploaded.url;
-        fs.unlinkSync(req.file.path);
       }
 
       const article = await newsArticleService.update(req.params.id, payload);
