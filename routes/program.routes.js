@@ -8,7 +8,10 @@ import {
 } from "../middlewares/program.validation.js";
 
 const router = express.Router();
-const upload = multer({ dest: "tmp/" });
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+});
 
 // ===== CHILD ROUTES - đặt trước /:id =====
 router.post(
@@ -54,7 +57,6 @@ router.delete("/education/:id", programController.deleteEdu);
 router.delete("/sport/:id", programController.deleteSport);
 router.delete("/teacher/:id", programController.deleteTeacher);
 
-// ===== PARENT ROUTES =====
 router.post("/", validateProgramCreate, programController.create);
 router.get("/", programController.getAll);
 router.get("/:id", programController.getById);
