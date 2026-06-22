@@ -14,16 +14,31 @@ import programRoutes from "./routes/program.routes.js";
 import siteContentRoutes from "./routes/siteContent.routes.js";
 import oauthRoutes from "./routes/oauth2.routes.js";
 import index from "./routes/index.js";
+
 const app = express();
 
 app.use(helmet());
-app.use(cors());
+
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://schoolkid.vn"
+  ],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+app.options("*", cors());
+
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // ROUTES
-app.use("/",index);
-//app.use("/", oauthRoutes);
+app.use("/", index);
+// app.use("/", oauthRoutes);
 app.use("/api/promotional-videos", promotionalVideoRoutes);
 app.use("/api/site-content", siteContentRoutes);
 app.use("/api/newsletter", newsletterRoutes);
@@ -32,4 +47,5 @@ app.use("/api/news-articles", newsArticleRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/programs", programRoutes);
 app.use("/api/applications", applicationRoutes);
+
 export default app;
