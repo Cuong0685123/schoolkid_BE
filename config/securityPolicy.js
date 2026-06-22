@@ -6,6 +6,7 @@ import cors from "cors";
 // ====== Cấu hình CORS ======
 export const corsOptions = {
   origin: [
+    "http://localhost:3000",
     "http://localhost:5173", // FE dev
     "https://schoolkid.vn",  // Domain production
   ],
