@@ -1,6 +1,6 @@
 import express from "express";
 import morgan from "morgan";
-import { securityMiddlewares } from "./config/securityPolicies.js";
+import { securityMiddlewares } from "./config/securityPolicy.js";
 
 // ROUTES
 import promotionalVideoRoutes from "./routes/promotionalVideo.routes.js";
