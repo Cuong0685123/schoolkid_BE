@@ -16,6 +16,8 @@ import index from "./routes/index.js";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 securityMiddlewares(app);
 
 app.use(morgan("dev"));
