@@ -3,10 +3,15 @@ import { Readable } from "stream";
 import dotenv from "dotenv";
 
 dotenv.config();
-console.log("CLIENT_ID =", OAUTH_CLIENT_ID);
-console.log("REDIRECT =", OAUTH_REDIRECT_URI);
 
-const { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_REDIRECT_URI } = process.env;
+const {
+  OAUTH_CLIENT_ID,
+  OAUTH_CLIENT_SECRET,
+  OAUTH_REDIRECT_URI,
+} = process.env;
+
+console.log("OAUTH_CLIENT_ID:", OAUTH_CLIENT_ID);
+console.log("OAUTH_REDIRECT_URI:", OAUTH_REDIRECT_URI);
 
 const oauth2Client = new google.auth.OAuth2(
   OAUTH_CLIENT_ID,
