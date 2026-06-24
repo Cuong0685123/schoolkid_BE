@@ -6,13 +6,6 @@ dotenv.config();
 
 const { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_REDIRECT_URI } = process.env;
 
-console.log("GOOGLE DRIVE CONFIG:", {
-  hasClientId: !!OAUTH_CLIENT_ID,
-  hasClientSecret: !!OAUTH_CLIENT_SECRET,
-  redirectUri: OAUTH_REDIRECT_URI,
-  hasTokenJson: !!process.env.GOOGLE_TOKEN_JSON,
-});
-
 const oauth2Client = new google.auth.OAuth2(
   OAUTH_CLIENT_ID,
   OAUTH_CLIENT_SECRET,
@@ -24,10 +17,6 @@ const PROMOTIONAL_FOLDER_ID = process.env.GOOGLE_PROMOTIONAL_FOLDER_ID;
 if (process.env.GOOGLE_TOKEN_JSON) {
   try {
     const tokens = JSON.parse(process.env.GOOGLE_TOKEN_JSON);
-    console.log("GOOGLE TOKEN:", {
-      hasAccessToken: !!tokens.access_token,
-      hasRefreshToken: !!tokens.refresh_token,
-    });
     oauth2Client.setCredentials(tokens);
   } catch (err) {
     console.error("GOOGLE_TOKEN_JSON parse error:", err.message);
@@ -62,13 +51,26 @@ const bufferToStream = (buffer) => {
 };
 
 export const uploadFile = async (fileBuffer, mimeType, fileName) => {
+  console.log("UPLOAD FILE CHECK:", {
+    fileName,
+    mimeType,
+    isBuffer: Buffer.isBuffer(fileBuffer),
+    size: fileBuffer?.length,
+    firstBytes: Buffer.isBuffer(fileBuffer)
+      ? fileBuffer.subarray(0, 12).toString("hex")
+      : null,
+  });
+
   if (!PROMOTIONAL_FOLDER_ID) {
     throw new Error("GOOGLE_PROMOTIONAL_FOLDER_ID is missing");
   }
 
-  const credentials = oauth2Client.credentials || {};
-  if (!credentials.access_token && !credentials.refresh_token) {
-    throw new Error("Google Drive credentials missing. Check GOOGLE_TOKEN_JSON env.");
+  if (!fileBuffer || !Buffer.isBuffer(fileBuffer)) {
+    throw new Error("Invalid file buffer. Multer must use memoryStorage.");
+  }
+
+  if (!fileBuffer.length) {
+    throw new Error("File buffer is empty.");
   }
 
   const drive = google.drive({ version: "v3", auth: oauth2Client });
@@ -77,15 +79,18 @@ export const uploadFile = async (fileBuffer, mimeType, fileName) => {
     requestBody: {
       name: fileName,
       parents: [PROMOTIONAL_FOLDER_ID],
+      mimeType,
     },
     media: {
       mimeType,
       body: bufferToStream(fileBuffer),
     },
-    fields: "id",
+    fields: "id, name, mimeType, size",
   });
 
   const fileId = response.data.id;
+
+  console.log("GOOGLE DRIVE CREATED:", response.data);
 
   await drive.permissions.create({
     fileId,
@@ -94,6 +99,8 @@ export const uploadFile = async (fileBuffer, mimeType, fileName) => {
       type: "anyone",
     },
   });
+
+  console.log("GOOGLE DRIVE PUBLIC URL:", `https://drive.google.com/uc?id=${fileId}`);
 
   return {
     id: fileId,
