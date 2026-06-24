@@ -1,29 +1,19 @@
-import fs from "fs";
 import { programService } from "../services/program.service.js";
 import { uploadFile } from "../services/googleDrive.service.js";
-
-const removeTempFile = (filePath) => {
-  if (filePath && fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
-};
 
 const uploadImageIfExists = async (file) => {
   if (!file) return null;
 
   const uploaded = await uploadFile(
-    file.path,
+    file.buffer,
     file.mimetype,
     file.originalname
   );
-
-  removeTempFile(file.path);
 
   return uploaded.url;
 };
 
 export const programController = {
-  // ===== PARENT PROGRAM =====
   create: async (req, res) => {
     try {
       const program = await programService.createProgram(req.body);
@@ -46,7 +36,6 @@ export const programController = {
     try {
       const data = await programService.getById(req.params.id);
       if (!data) return res.status(404).json({ message: "Không tìm thấy" });
-
       res.json(data);
     } catch (err) {
       res.status(500).json({ message: err.message });
@@ -71,7 +60,6 @@ export const programController = {
     }
   },
 
-  // ===== CHILD CREATE =====
   createEdu: async (req, res) => {
     try {
       const thumbnailUrl = await uploadImageIfExists(req.file);
@@ -83,7 +71,6 @@ export const programController = {
 
       res.json({ message: "Tạo EDU child thành công", data });
     } catch (err) {
-      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
@@ -99,7 +86,6 @@ export const programController = {
 
       res.json({ message: "Tạo SPORT child thành công", data });
     } catch (err) {
-      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
@@ -115,12 +101,10 @@ export const programController = {
 
       res.json({ message: "Tạo TEACHER child thành công", data });
     } catch (err) {
-      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
 
-  // ===== CHILD UPDATE =====
   updateEdu: async (req, res) => {
     try {
       const updateData = { ...req.body };
@@ -133,7 +117,6 @@ export const programController = {
       const data = await programService.updateEdu(req.params.id, updateData);
       res.json({ message: "Cập nhật EDU child thành công", data });
     } catch (err) {
-      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
@@ -150,7 +133,6 @@ export const programController = {
       const data = await programService.updateSport(req.params.id, updateData);
       res.json({ message: "Cập nhật SPORT child thành công", data });
     } catch (err) {
-      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
@@ -167,12 +149,10 @@ export const programController = {
       const data = await programService.updateTeacher(req.params.id, updateData);
       res.json({ message: "Cập nhật TEACHER child thành công", data });
     } catch (err) {
-      removeTempFile(req.file?.path);
       res.status(400).json({ message: err.message });
     }
   },
 
-  // ===== CHILD DELETE =====
   deleteEdu: async (req, res) => {
     try {
       await programService.deleteEdu(req.params.id);
