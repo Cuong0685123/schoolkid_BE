@@ -5,6 +5,7 @@ import cors from "cors";
 
 export const corsOptions = {
   origin: [
+    "https://schoolkid-fe-final.vercel.app/",
     "http://localhost:3000",
     "http://localhost:5173",
     "https://schoolkid.vn",
