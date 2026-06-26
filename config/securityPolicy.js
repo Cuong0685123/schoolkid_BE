@@ -4,14 +4,32 @@ import hpp from "hpp";
 import cors from "cors";
 
 export const corsOptions = {
-  origin: [
-    "https://schoolkid-fe-final.vercel.app/",
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://schoolkid.vn",
-  ],
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "https://schoolkid-fe-final.vercel.app",
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "https://schoolkid.vn",
+      "https://www.schoolkid.vn",
+    ];
+
+    // Cho phép Postman, Server-to-Server...
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked: ${origin}`));
+  },
+
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+  ],
+
   credentials: true,
 };
 
@@ -26,7 +44,13 @@ export const apiLimiter = rateLimit({
 
 export const securityMiddlewares = (app) => {
   app.use(helmet());
+
   app.use(cors(corsOptions));
+
+  // xử lý preflight request
+  app.options("*", cors(corsOptions));
+
   app.use(hpp());
+
   app.use("/api/", apiLimiter);
 };
